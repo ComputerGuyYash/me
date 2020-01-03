@@ -69,7 +69,7 @@ for file in req:
                     a = np.vstack((a,encoded))
                 #print(encoded)
             except Exception as exception:
-                np.savetxt("mydata/"+str(milestone)+".csv",a,delimiter=",")
+                np.savetxt("mydata/"+str(milestone)+".csv",a,delimiter=",",fmt='% d')
                 milestone+=1
                 break
                 #print(exception)
@@ -79,4 +79,4 @@ for file in req:
         current_frame+=1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-np.savetxt("mydata/end.csv",a,delimiter=",")
+np.savetxt("mydata/end.csv",a,delimiter=",",fmt='% d')
