@@ -11,7 +11,6 @@ import subprocess
 # SetUpPyAudio(audio_file):
 chunk = 1024
 p = pyaudio.PyAudio()
-
     
 def ConvertToWav(file_name,file):
 
@@ -30,13 +29,14 @@ with open(path+"\metadata.json") as json_file:
     for x in data:
         if(data[x]["label"]=="REAL"):
             req.append(x)
-    
-i = 0
-
+milestone = 0
+file = 0
 #req=["aamjfukxwp.mp4"]
 frames = 0
 current_frame = 0
+a = np.array([])
 for file in req:
+    print(file)
     current_file = path+"\\"+file
     ConvertToWav(current_file,file)
     cap = cv2.VideoCapture(current_file)
@@ -50,31 +50,33 @@ for file in req:
             frames+=60
             ret,img=cap.read()
             
-            scale_percent=50
+            scale_percent=100
             try:
-                i+=1
                 width = int(img.shape[1] * scale_percent / 100)
                 height = int(img.shape[0] * scale_percent / 100)
-                dim = (width, height)    
+                dim = (width, height)   
                 resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
-                cv2.imshow("image",resized)
+                #cv2.imshow("image",resized)
                 left_channel = data[0]
                 volume = np.linalg.norm(left_channel)
-                print(volume)
-            except:
+                #print(volume)
+                detected_face = face_recognition.face_encodings(resized)[0]
+                encoded = ((detected_face*1000).astype(int))
+                encoded = np.append(encoded,volume)
+                if str(a) == "[]":
+                    a = encoded
+                else:
+                    a = np.vstack((a,encoded))
+                #print(encoded)
+            except Exception as exception:
+                np.savetxt("mydata/"+str(milestone)+".csv",a,delimiter=",")
+                milestone+=1
                 break
+                #print(exception)
+                #current_frame+=10
+                #frames+=10
+                #pass
         current_frame+=1
-        
-        
-        
-        
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        
-
-    """
-    with audioread.audio_open(current_file) as f:
-        print(f.channels, f.samplerate, f.duration)
-        for buf in f:
-            print(buf)
-    """    
+np.savetxt("mydata/end.csv",a,delimiter=",")
