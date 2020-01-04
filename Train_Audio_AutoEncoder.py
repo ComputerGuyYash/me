@@ -7,7 +7,7 @@ import wave
 import pyaudio
 import matplotlib.pyplot as plt
 import subprocess
-
+import math
 # SetUpPyAudio(audio_file):
 chunk = 1024
 p = pyaudio.PyAudio()
@@ -35,6 +35,10 @@ file = 0
 frames = 0
 current_frame = 0
 a = np.array([])
+def distance(a,b):
+    x1,y1 = a
+    x2,y2 = b
+    return math.sqrt(pow(x1-x2,2)+pow(y1-y2,2))
 for file in req:
     print(file)
     current_file = path+"\\"+file
@@ -61,7 +65,15 @@ for file in req:
                 volume = np.linalg.norm(left_channel)
                 #print(volume)
                 detected_face = face_recognition.face_landmarks(resized)[0]
-                print(detected_face['chin'][int(len(detected_face['chin'])/2)])
+                chin=detected_face['nose_tip'][int(len(detected_face['nose_tip'])/2)]
+                l = []
+                for x in detected_face['chin']:
+                    l.append(distance(chin,x))
+                l.append(volume)
+                if str(a)=="[]":
+                    a = np.append(a,l)
+                a = np.vstack((a,l))
+                #a = np.append(a,l)
             except Exception as exception:
                 np.savetxt("mydata/"+str(milestone)+".csv",a,delimiter=",",fmt='% d')
                 milestone+=1
